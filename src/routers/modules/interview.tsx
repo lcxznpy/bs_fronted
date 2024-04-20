@@ -28,6 +28,15 @@ const interviewRouter: Array<RouteObject> = [
 					title: "创建面试房间",
 					key: "create_room"
 				}
+			},
+			{
+				path: "/interview/enterroom",
+				element: lazyLoad(React.lazy(() => import("@/views/interview/enter/index"))),
+				meta: {
+					requiresAuth: true,
+					title: "面试房间",
+					key: "room"
+				}
 			}
 		]
 	}

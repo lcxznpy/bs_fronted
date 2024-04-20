@@ -7,6 +7,7 @@ import { createHtmlPlugin } from "vite-plugin-html";
 import viteCompression from "vite-plugin-compression";
 import eslintPlugin from "vite-plugin-eslint";
 import { createSvgIconsPlugin } from "vite-plugin-svg-icons";
+import fs from "fs";
 
 // @see: https://vitejs.dev/config/
 export default defineConfig((mode: ConfigEnv): UserConfig => {
@@ -38,43 +39,47 @@ export default defineConfig((mode: ConfigEnv): UserConfig => {
 			host: "0.0.0.0", // 服务器主机名，如果允许外部访问，可设置为"0.0.0.0"
 			port: viteEnv.VITE_PORT,
 			open: viteEnv.VITE_OPEN,
+			https: {
+				key: fs.readFileSync("certificate/server.key"),
+				cert: fs.readFileSync("certificate/server.crt")
+			},
 			cors: true,
 			// https: false,
 			// 代理跨域（mock 不需要配置，这里只是个事列）
 			proxy: {
-				"^\/v1\/user\/.*": {
+				"^/v1/user/.*": {
 					target: "http://localhost:8888", // easymock
-					changeOrigin: true,
+					changeOrigin: true
 					// rewrite: path => path.replace(/^\/v1/, "")
 				},
-				"^\/v1\/article\/.*": {
+				"^/v1/article/.*": {
 					target: "http://localhost:8892", // easymock
-					changeOrigin: true,
+					changeOrigin: true
 					// rewrite: path => path.replace(/^\/v1/, "")
 				},
-				"^\/v1\/interview\/.*": {
+				"^/v1/interview/.*": {
 					target: "http://localhost:8894", // easymock
-					changeOrigin: true,
+					changeOrigin: true
 					// rewrite: path => path.replace(/^\/v1/, "")
 				},
-				"^\/v1\/job\/.*": {
+				"^/v1/job/.*": {
 					target: "http://localhost:8893", // easymock
-					changeOrigin: true,
+					changeOrigin: true
 					// rewrite: path => path.replace(/^\/v1/, "")
 				},
-				"^\/v1\/resume\/.*": {
+				"^/v1/resume/.*": {
 					target: "http://localhost:8891", // easymock
-					changeOrigin: true,
+					changeOrigin: true
 					// rewrite: path => path.replace(/^\/v1/, "")
 				},
-				"^\/v1\/sms\/.*": {
+				"^/v1/sms/.*": {
 					target: "http://localhost:8889", // easymock
-					changeOrigin: true,
+					changeOrigin: true
 					// rewrite: path => path.replace(/^\/v1/, "")
 				},
-				"^\/v1\/upload\/.*": {
+				"^/v1/upload/.*": {
 					target: "http://localhost:8890", // easymock
-					changeOrigin: true,
+					changeOrigin: true
 					// rewrite: path => path.replace(/^\/v1/, "")
 				}
 			}

@@ -40,6 +40,11 @@ const BasicForm = () => {
 				message.success("创建成功！");
 				navigate("/interview/list");
 			}
+			if (data?.code !== null && data?.message !== null) {
+				console.log(data?.code, data?.message);
+				message.error(data?.message);
+				throw new Error(data?.message);
+			}
 			setLoading(false);
 		} catch (e) {
 			setLoading(false);
