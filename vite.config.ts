@@ -42,10 +42,40 @@ export default defineConfig((mode: ConfigEnv): UserConfig => {
 			// https: false,
 			// 代理跨域（mock 不需要配置，这里只是个事列）
 			proxy: {
-				"/api": {
-					target: "https://mock.mengxuegu.com/mock/62abda3212c1416424630a45", // easymock
+				"^\/v1\/user\/.*": {
+					target: "http://localhost:8888", // easymock
 					changeOrigin: true,
-					rewrite: path => path.replace(/^\/api/, "")
+					// rewrite: path => path.replace(/^\/v1/, "")
+				},
+				"^\/v1\/article\/.*": {
+					target: "http://localhost:8892", // easymock
+					changeOrigin: true,
+					// rewrite: path => path.replace(/^\/v1/, "")
+				},
+				"^\/v1\/interview\/.*": {
+					target: "http://localhost:8894", // easymock
+					changeOrigin: true,
+					// rewrite: path => path.replace(/^\/v1/, "")
+				},
+				"^\/v1\/job\/.*": {
+					target: "http://localhost:8893", // easymock
+					changeOrigin: true,
+					// rewrite: path => path.replace(/^\/v1/, "")
+				},
+				"^\/v1\/resume\/.*": {
+					target: "http://localhost:8891", // easymock
+					changeOrigin: true,
+					// rewrite: path => path.replace(/^\/v1/, "")
+				},
+				"^\/v1\/sms\/.*": {
+					target: "http://localhost:8889", // easymock
+					changeOrigin: true,
+					// rewrite: path => path.replace(/^\/v1/, "")
+				},
+				"^\/v1\/upload\/.*": {
+					target: "http://localhost:8890", // easymock
+					changeOrigin: true,
+					// rewrite: path => path.replace(/^\/v1/, "")
 				}
 			}
 		},

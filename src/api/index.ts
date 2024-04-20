@@ -39,7 +39,7 @@ class RequestHttp {
 				// * 如果当前请求不需要显示 loading,在api服务中通过指定的第三个参数: { headers: { noLoading: true } }来控制不显示loading，参见loginApi
 				config.headers!.noLoading || showFullScreenLoading();
 				const token: string = store.getState().global.token;
-				return { ...config, headers: { ...config.headers, "x-access-token": token } };
+				return { ...config, headers: { ...config.headers, Authorization: token } };
 			},
 			(error: AxiosError) => {
 				return Promise.reject(error);
@@ -65,10 +65,10 @@ class RequestHttp {
 					return Promise.reject(data);
 				}
 				// * 全局错误信息拦截（防止下载文件得时候返回数据流，没有code，直接报错）
-				if (data.code && data.code !== ResultEnum.SUCCESS) {
-					message.error(data.msg);
-					return Promise.reject(data);
-				}
+				// if (data.code && data.code !== ResultEnum.SUCCESS) {
+				// 	message.error(data.msg);
+				// 	return Promise.reject(data);
+				// }
 				// * 成功请求（在页面上除非特殊情况，否则不用处理失败逻辑）
 				return data;
 			},
@@ -92,6 +92,7 @@ class RequestHttp {
 		return this.service.get(url, { params, ..._object });
 	}
 	post<T>(url: string, params?: object, _object = {}): Promise<ResultData<T>> {
+		// console.log(url);
 		return this.service.post(url, params, _object);
 	}
 	put<T>(url: string, params?: object, _object = {}): Promise<ResultData<T>> {
