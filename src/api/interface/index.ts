@@ -83,21 +83,57 @@ export namespace Interview {
 		success: boolean;
 	}
 }
-// {
-// 	// export interface SendReq {
-// 	// 	phone: string;
-// 	// }
-// 	// export interface SendResp {
-// 	// 	code: string;
-// 	// 	message: string;
-// 	// }
-// 	// export interface Token {
-// 	// 	access_token: string;
-// 	// 	access_expire: bigint;
-// 	// 	refresh_token: string;
-// 	// 	refresh_expire: bigint;
-// 	// }
-// 	// export interface ResAuthButtons {
-// 	// 	[propName: string]: any;
-// 	// }
-// }
+
+export namespace Job {
+	// export interface JobListReq {}
+	export interface JobListResp {
+		jobs: Job[];
+	}
+	export interface Job {
+		job_id: number;
+		user_id: number;
+		desc: string;
+		content: string;
+		salary: string;
+		address: string;
+		company: string;
+	}
+	export interface CreateJobReq {
+		desc: string;
+		content: string;
+		salary: string;
+		address: string;
+		company: string;
+	}
+	export interface CreateJobResp {
+		job_id: number;
+		success: boolean;
+	}
+}
+
+export namespace Article {
+	// export interface JobListReq {}
+	export interface ArticleListResp {
+		articles: Article[];
+	}
+	export interface Article {
+		article_id: number;
+		user_id: number;
+		title: string;
+		content: string;
+	}
+	export interface CreateArticleReq {
+		title: string;
+		content: string;
+	}
+	export interface CreateArticleResp {
+		article_id: number;
+		success: boolean;
+	}
+}
+
+export namespace Upload {
+	export interface UploadResp {
+		url: string;
+	}
+}

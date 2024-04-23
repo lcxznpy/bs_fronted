@@ -21,14 +21,11 @@ const LoginForm = (props: any) => {
 	const onFinish = async (loginForm: Login.ReqLoginForm) => {
 		try {
 			setLoading(true);
-			// loginForm.password = md5(loginForm.password);
-
 			const data = await loginApi(loginForm);
 			if (!data) {
 				message.error("后端返回数据为空");
 				throw new Error("后端返回数据为空");
 			}
-			// console.log("data", data?.Token?.access_token);
 			console.log("data", data);
 			setToken(data?.token?.access_token);
 			if (data?.userId === undefined && data?.token?.access_token === undefined) {

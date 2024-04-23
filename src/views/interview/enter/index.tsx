@@ -1,4 +1,6 @@
+// import Password from "antd/lib/input/Password";
 import React, { useState, useEffect, useRef } from "react";
+// import { NavLink } from "react-router-dom";
 
 interface MediaStreamWithTracks extends MediaStream {
 	addTrack(track: MediaStreamTrack): void;
@@ -48,7 +50,7 @@ const ICE_CFG: RTCConfiguration = {
 
 const VideoChatApp: React.FC = () => {
 	const [peerId, setPeerId] = useState("");
-	const [remotePeerId, setRemotePeerId] = useState<string | null>(null);
+	// const [remotePeerId, setRemotePeerId] = useState("");
 	const [peers, setPeers] = useState<string[]>([]);
 	const [isConnected, setIsConnected] = useState(false);
 	const localVideoRef = useRef<HTMLVideoElement>(null);
@@ -57,11 +59,16 @@ const VideoChatApp: React.FC = () => {
 	const rtcPeerConnRef = useRef<RTCPeerConnection | null>(null);
 	const localStreamRef = useRef<MediaStream | null>(null);
 	const remoteStreamRef = useRef<MediaStreamWithTracks | null>(null);
-
+	// useEffect(() => {
+	// 	console.log(remotePeerId); //dx1
+	// }, [remotePeerId]);
 	useEffect(() => {
 		return () => {
 			closeConnections();
 		};
+	}, []);
+	useEffect(() => {
+		console.log(remoteVideoRef.current); // 查看是否有视频DOM元素
 	}, []);
 	useEffect(() => {
 		return () => {
@@ -73,9 +80,9 @@ const VideoChatApp: React.FC = () => {
 			}
 		};
 	}, []);
-	const createOffer = async () => {
-		if (!rtcPeerConnRef.current || !wsConnRef.current || !remotePeerId) {
-			console.log(!rtcPeerConnRef.current, !wsConnRef.current, !remotePeerId);
+	const createOffer = async (remoteId: string) => {
+		if (!rtcPeerConnRef.current || !wsConnRef.current || !remoteId) {
+			console.log(!rtcPeerConnRef.current, !wsConnRef.current, !remoteId);
 			console.error("RTCPeerConnection is not initialized or no WebSocket connection.");
 			return;
 		}
@@ -86,12 +93,12 @@ const VideoChatApp: React.FC = () => {
 				offerToReceiveVideo: true
 			});
 			await rtcPeerConnRef.current.setLocalDescription(offer);
-
+			console.log("toPeerId", remoteId);
 			const sdpMessage: RTCSessionDescriptionMessage = {
 				messageId: "PROXY",
 				type: "sdp",
 				fromPeerId: peerId,
-				toPeerId: remotePeerId,
+				toPeerId: remoteId,
 				messageData: {
 					sdp: offer
 				}
@@ -125,27 +132,36 @@ const VideoChatApp: React.FC = () => {
 	};
 	const handleProxyMessage = (message: PeerMessage) => {
 		const { type } = message;
-		console.log(!rtcPeerConnRef.current);
-		if (!rtcPeerConnRef.current) return;
+
 		console.log(type);
 		switch (type) {
 			case "start_call":
+				console.log("start_call ", message.fromPeerId);
 				startCall(false, message.fromPeerId || "");
 				break;
 			case "receive_call":
-				createOffer();
+				console.log(!rtcPeerConnRef.current);
+				if (!rtcPeerConnRef.current) return;
+				console.log("receive ", message.fromPeerId);
+				createOffer(message.fromPeerId || "");
 				break;
 			case "sdp":
-				handleSDP(message.messageData.sdp, message.type);
+				console.log(!rtcPeerConnRef.current);
+				if (!rtcPeerConnRef.current) return;
+				console.log("sdp ", message.fromPeerId);
+				handleSDP(message.messageData.sdp, message.type, message.fromPeerId || "");
 				break;
 			case "candidate":
+				console.log(!rtcPeerConnRef.current);
+				if (!rtcPeerConnRef.current) return;
+				console.log("candidate ", message.fromPeerId);
 				handleCandidate(message.messageData.candidate);
 				break;
 			default:
 				console.log("Received unknown proxy type:", type);
 		}
 	};
-	const handleSDP = async (sdp: RTCSessionDescriptionInit | undefined, type: string | undefined) => {
+	const handleSDP = async (sdp: RTCSessionDescriptionInit | undefined, type: string | undefined, remoteId: string) => {
 		if (!rtcPeerConnRef.current || !sdp) return;
 
 		try {
@@ -153,11 +169,12 @@ const VideoChatApp: React.FC = () => {
 				await rtcPeerConnRef.current.setRemoteDescription(new RTCSessionDescription(sdp));
 				const answer = await rtcPeerConnRef.current.createAnswer();
 				await rtcPeerConnRef.current.setLocalDescription(answer);
+				console.log("toPeerId", remoteId);
 				const sdpMessage: RTCSessionDescriptionMessage = {
 					messageId: "PROXY",
 					type: "sdp",
 					fromPeerId: peerId,
-					toPeerId: remotePeerId!,
+					toPeerId: remoteId!,
 					messageData: {
 						sdp: answer
 					}
@@ -185,13 +202,14 @@ const VideoChatApp: React.FC = () => {
 	// 		wsConnRef.current.send(JSON.stringify({ type, ...data }));
 	// 	}
 	// };
-	const handleICECandidate = (event: RTCPeerConnectionIceEvent) => {
-		if (event.candidate && remotePeerId && wsConnRef.current) {
+	const handleICECandidate = (remoteId: string) => (event: RTCPeerConnectionIceEvent) => {
+		if (event.candidate && remoteId && wsConnRef.current) {
+			// console.log("toPeerId", remoteId);
 			const proxyCandidateMessage: RTCIceCandidateMessage = {
 				messageId: "PROXY",
 				type: "candidate",
 				fromPeerId: peerId,
-				toPeerId: remotePeerId,
+				toPeerId: remoteId,
 				messageData: {
 					candidate: event.candidate
 				}
@@ -204,20 +222,23 @@ const VideoChatApp: React.FC = () => {
 		console.log("ICE Connection State Change:", rtcPeerConnRef.current?.iceConnectionState);
 	};
 
-	const handleTrack = (event: RTCTrackEvent) => {
+	const handleTrack = async (event: RTCTrackEvent) => {
 		if (!remoteStreamRef.current) {
 			remoteStreamRef.current = new MediaStream() as MediaStreamWithTracks;
 			if (remoteVideoRef.current) {
-				remoteVideoRef.current.srcObject = remoteStreamRef.current;
+				// remoteVideoRef.current.srcObject = remoteStreamRef.current;
+				console.log("video trueeeeeeeeeee");
 			}
 		}
+		// remoteVideoRef.current.srcObject = remoteStreamRef.current;
+		console.log("remote_track", event.track);
 		remoteStreamRef.current.addTrack(event.track);
 	};
 
-	const createRTCPeerConnection = () => {
+	const createRTCPeerConnection = (remoteId: string) => {
 		if (rtcPeerConnRef.current) return;
 		rtcPeerConnRef.current = new RTCPeerConnection(ICE_CFG);
-		rtcPeerConnRef.current.onicecandidate = handleICECandidate;
+		rtcPeerConnRef.current.onicecandidate = handleICECandidate(remoteId || "");
 		rtcPeerConnRef.current.oniceconnectionstatechange = handleICEConnectionStateChange;
 		rtcPeerConnRef.current.ontrack = handleTrack;
 	};
@@ -233,8 +254,11 @@ const VideoChatApp: React.FC = () => {
 	};
 
 	const startCall = async (isInitiator: boolean, remoteId: string) => {
-		setRemotePeerId(remoteId);
-		createRTCPeerConnection();
+		console.log(remoteId);
+		// await setRemotePeerId(remoteId);
+		// console.log(remotePeerId); // nil
+		console.log("createRtconn", remoteId);
+		createRTCPeerConnection(remoteId || "");
 		localStreamRef.current = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
 		if (localVideoRef.current) {
 			localVideoRef.current.srcObject = localStreamRef.current;
@@ -245,11 +269,13 @@ const VideoChatApp: React.FC = () => {
 			rtcPeerConnRef.current?.addTrack(track);
 		});
 		if (isInitiator && wsConnRef.current) {
+			console.log("frompeerid", peerId);
+			console.log("topeerid", remoteId);
 			const startCallMessage = {
 				messageId: "PROXY",
 				type: "start_call",
 				fromPeerId: peerId,
-				toPeerId: remotePeerId
+				toPeerId: remoteId
 			};
 			wsConnRef.current.send(JSON.stringify(startCallMessage));
 		} else if (!isInitiator && wsConnRef.current) {
@@ -257,7 +283,7 @@ const VideoChatApp: React.FC = () => {
 				messageId: "PROXY",
 				type: "receive_call",
 				fromPeerId: peerId,
-				toPeerId: remotePeerId
+				toPeerId: remoteId
 			};
 			wsConnRef.current.send(JSON.stringify(receiveCallMessage));
 		}
@@ -296,6 +322,7 @@ const VideoChatApp: React.FC = () => {
 	return (
 		<div>
 			<input value={peerId} onChange={e => setPeerId(e.target.value)} placeholder="Enter your Peer ID" />
+			<input id="Password" placeholder="Enter your password" />
 			<button onClick={handleLogin}>{isConnected ? "Logout" : "Login"}</button>
 			<div>
 				{peers.map(peer => (
@@ -304,8 +331,12 @@ const VideoChatApp: React.FC = () => {
 					</button>
 				))}
 			</div>
-			<video ref={localVideoRef} autoPlay muted />
-			<video ref={remoteVideoRef} autoPlay />
+			<video ref={localVideoRef} autoPlay></video>
+			<video ref={localVideoRef} autoPlay></video>
+			{/* <video ref={remoteVideoRef} autoPlay></video> */}
+			{/* <video ref={localVideoRef} autoPlay muted />
+			<video ref={remoteVideoRef} autoPlay muted /> */}
+			<p>Video should be above this text.</p>
 			{/* 其他 UI 元素 */}
 		</div>
 	);
