@@ -43,6 +43,7 @@ export default defineConfig((mode: ConfigEnv): UserConfig => {
 				key: fs.readFileSync("certificate/server.key"),
 				cert: fs.readFileSync("certificate/server.crt")
 			},
+			hmr: false,
 			cors: true,
 			// https: false,
 			// 代理跨域（mock 不需要配置，这里只是个事列）
