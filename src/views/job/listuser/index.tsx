@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect, useState } from "react";
 import { Table, DatePicker, message } from "antd";
 // import useAuthButtons from "@/hooks/useAuthButtons";

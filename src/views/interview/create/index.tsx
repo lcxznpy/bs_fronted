@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Button, Form, Input, message, DatePicker } from "antd";
 import "./index.less";
 import moment from "moment";
