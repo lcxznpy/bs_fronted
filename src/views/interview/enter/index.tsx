@@ -54,7 +54,7 @@ const VideoChatApp: React.FC = () => {
 	const [peers, setPeers] = useState<string[]>([]);
 	const [isConnected, setIsConnected] = useState(false);
 	const localVideoRef = useRef<HTMLVideoElement>(null);
-	const remoteVideoRef = useRef<HTMLVideoElement>(null);
+	let remoteVideoRef = useRef<HTMLVideoElement>(null);
 	const wsConnRef = useRef<WebSocket | null>(null);
 	const rtcPeerConnRef = useRef<RTCPeerConnection | null>(null);
 	const localStreamRef = useRef<MediaStream | null>(null);
@@ -67,9 +67,9 @@ const VideoChatApp: React.FC = () => {
 			closeConnections();
 		};
 	}, []);
-	useEffect(() => {
-		console.log(remoteVideoRef.current); // 查看是否有视频DOM元素
-	}, []);
+	// useEffect(() => {
+	// 	console.log("remoteVideoRef.current", remoteVideoRef.current); // 查看是否有视频DOM元素
+	// }, []);
 	useEffect(() => {
 		return () => {
 			if (wsConnRef.current) {
@@ -132,6 +132,7 @@ const VideoChatApp: React.FC = () => {
 	};
 	const handleProxyMessage = (message: PeerMessage) => {
 		const { type } = message;
+		const qaq = message.messageData?.sdp?.type;
 
 		console.log(type);
 		switch (type) {
@@ -149,7 +150,7 @@ const VideoChatApp: React.FC = () => {
 				console.log(!rtcPeerConnRef.current);
 				if (!rtcPeerConnRef.current) return;
 				console.log("sdp ", message.fromPeerId);
-				handleSDP(message.messageData.sdp, message.type, message.fromPeerId || "");
+				handleSDP(message.messageData.sdp, qaq, message.fromPeerId || "");
 				break;
 			case "candidate":
 				console.log(!rtcPeerConnRef.current);
@@ -197,11 +198,6 @@ const VideoChatApp: React.FC = () => {
 			console.error("Failed to add ICE candidate:", error);
 		}
 	};
-	// const sendMessage = (type: string, data: any) => {
-	// 	if (wsConnRef.current) {
-	// 		wsConnRef.current.send(JSON.stringify({ type, ...data }));
-	// 	}
-	// };
 	const handleICECandidate = (remoteId: string) => (event: RTCPeerConnectionIceEvent) => {
 		if (event.candidate && remoteId && wsConnRef.current) {
 			// console.log("toPeerId", remoteId);
@@ -215,6 +211,10 @@ const VideoChatApp: React.FC = () => {
 				}
 			};
 			wsConnRef.current.send(JSON.stringify(proxyCandidateMessage));
+			console.log("ice candidate sent", event.candidate);
+		} else {
+			console.log("");
+			console.log("failed to send candidate", event.candidate);
 		}
 	};
 
@@ -225,14 +225,16 @@ const VideoChatApp: React.FC = () => {
 	const handleTrack = async (event: RTCTrackEvent) => {
 		if (!remoteStreamRef.current) {
 			remoteStreamRef.current = new MediaStream() as MediaStreamWithTracks;
-			if (remoteVideoRef.current) {
-				// remoteVideoRef.current.srcObject = remoteStreamRef.current;
-				console.log("video trueeeeeeeeeee");
-			}
+			console.log("create remotestreamRef");
 		}
-		// remoteVideoRef.current.srcObject = remoteStreamRef.current;
+		if (remoteVideoRef.current) {
+			remoteVideoRef.current.srcObject = remoteStreamRef.current;
+			console.log("set remoteVideoRef src success");
+		}
+
 		console.log("remote_track", event.track);
 		remoteStreamRef.current.addTrack(event.track);
+		console.log("success send track");
 	};
 
 	const createRTCPeerConnection = (remoteId: string) => {
@@ -332,7 +334,7 @@ const VideoChatApp: React.FC = () => {
 				))}
 			</div>
 			<video ref={localVideoRef} autoPlay></video>
-			<video ref={localVideoRef} autoPlay></video>
+			<video ref={remoteVideoRef} autoPlay></video>
 			{/* <video ref={remoteVideoRef} autoPlay></video> */}
 			{/* <video ref={localVideoRef} autoPlay muted />
 			<video ref={remoteVideoRef} autoPlay muted /> */}

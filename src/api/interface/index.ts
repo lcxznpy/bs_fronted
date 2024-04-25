@@ -47,12 +47,6 @@ export namespace Login {
 			refresh_expire: bigint;
 		};
 	}
-	// export interface Token {
-	// 	access_token: string;
-	// 	access_expire: bigint;
-	// 	refresh_token: string;
-	// 	refresh_expire: bigint;
-	// }
 	export interface ResAuthButtons {
 		[propName: string]: any;
 	}
@@ -128,6 +122,12 @@ export namespace Article {
 	}
 	export interface CreateArticleResp {
 		article_id: number;
+		success: boolean;
+	}
+	export interface DeleteArticleReq {
+		article_id: number;
+	}
+	export interface DeleteArticleResp {
 		success: boolean;
 	}
 }

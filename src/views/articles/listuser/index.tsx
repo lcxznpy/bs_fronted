@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Table, DatePicker, message } from "antd";
 // import useAuthButtons from "@/hooks/useAuthButtons";
-import { ArticleListUserApi } from "@/api/modules/article";
+import { ArticleListUserApi, DeleteArticleApi } from "@/api/modules/article";
 import "./index.less";
 import { useNavigate } from "react-router-dom";
 // import { Interview } from "@/api/interface/interview";
@@ -15,6 +15,7 @@ const ListUser = () => {
 	const { RangePicker } = DatePicker;
 	const navigate = useNavigate();
 	const [datasource, setdatasource] = useState<any>();
+	const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 	useEffect(() => {
 		// console.log(BUTTONS);
 	}, []);
@@ -41,6 +42,24 @@ const ListUser = () => {
 		};
 		fetchData();
 	}, []);
+	const deleteArticle = async () =>{
+		try {
+			const resp = DeleteArticleApi({article_id:selectedRowKeys[0]})
+			if ( resp.success === false ) {
+				message.error("删除失败");
+				navigate("/article");
+			}else {
+				message.success("删除成功");
+				navigate("/article");
+			}
+		}
+	};
+	const rowSelection = {
+        type: 'radio',
+        onChange: (newSelectedRowKeys) => {
+            setSelectedRowKeys(newSelectedRowKeys);
+        },
+    };
 
 	const columns: any[] = [
 		{

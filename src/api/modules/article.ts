@@ -21,3 +21,9 @@ export const CreateArticleApi = (params: Article.CreateArticleReq) => {
 		headers: { "Content-Type": "application/json" }
 	});
 };
+
+export const DeleteArticleApi = (params: Article.DeleteArticleReq) => {
+	return http.post<Article.DeleteArticleResp>(ArticlePort + `/publish`, params, {
+		headers: { "Content-Type": "application/json" }
+	});
+};

@@ -15,8 +15,9 @@ const List = () => {
 	const { RangePicker } = DatePicker;
 	const navigate = useNavigate();
 	const [datasource, setdatasource] = useState<any>();
+
 	useEffect(() => {
-		// console.log(BUTTONS);
+		// console.log(BUTTONS);s
 	}, []);
 	useEffect(() => {
 		const fetchData = async () => {
