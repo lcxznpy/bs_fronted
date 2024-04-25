@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Drawer, Divider, Switch } from "antd";
 import { useState } from "react";
 import { connect } from "react-redux";

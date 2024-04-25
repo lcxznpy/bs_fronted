@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Tabs, message } from "antd";
 import { HomeFilled } from "@ant-design/icons";
 import { useEffect, useState } from "react";

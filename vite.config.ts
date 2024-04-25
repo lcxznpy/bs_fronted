@@ -129,6 +129,7 @@ export default defineConfig((mode: ConfigEnv): UserConfig => {
 			// 		drop_debugger: true
 			// 	}
 			// },
+			chunkSizeWarningLimit: 3000,
 			rollupOptions: {
 				output: {
 					// Static resource classification and packaging

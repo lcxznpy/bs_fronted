@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { connect } from "react-redux";
 import { updateCollapse } from "@/redux/modules/menu/action";

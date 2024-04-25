@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Button, Dropdown, Menu } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";

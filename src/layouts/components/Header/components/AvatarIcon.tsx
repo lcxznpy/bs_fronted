@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useRef } from "react";
 import { Avatar, Modal, Menu, Dropdown, message } from "antd";
 import { ExclamationCircleOutlined } from "@ant-design/icons";

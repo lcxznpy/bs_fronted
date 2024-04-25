@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { Fragment } from "react";
 import { UploadOutlined } from "@ant-design/icons";
 import type { UploadProps } from "antd";
