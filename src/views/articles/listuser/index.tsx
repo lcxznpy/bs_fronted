@@ -43,24 +43,24 @@ const ListUser = () => {
 		};
 		fetchData();
 	}, []);
-	const deleteArticle = async () =>{
+	const deleteArticle = async () => {
 		try {
-			const resp = DeleteArticleApi({article_id:selectedRowKeys[0]})
-			if ( resp.success === false ) {
+			const resp = DeleteArticleApi({ article_id: selectedRowKeys[0] });
+			if (resp.success === false) {
 				message.error("删除失败");
-				navigate("/article");
-			}else {
+			} else {
 				message.success("删除成功");
-				navigate("/article");
 			}
+		} finally {
+			navigate("/article");
 		}
 	};
 	const rowSelection = {
-        type: 'radio',
-        onChange: (newSelectedRowKeys) => {
-            setSelectedRowKeys(newSelectedRowKeys);
-        },
-    };
+		type: "radio",
+		onChange: newSelectedRowKeys => {
+			setSelectedRowKeys(newSelectedRowKeys);
+		}
+	};
 
 	const columns: any[] = [
 		{
