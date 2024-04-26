@@ -1,0 +1,24 @@
+.video-container {
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	margin: 0 auto;
+	padding: 20px; // 增加内边距以便视频有更多展示空间
+	gap: 20px; // 增加视频之间的间隙
+
+	& > div {
+		flex: 1;
+		text-align: center;
+		min-width: 300px; // 设置最小宽度，确保视频不会过小
+		max-width: 50%; // 每个视频的最大宽度不超过容器宽度的一半
+
+		p {
+			margin-bottom: 0.5rem;
+		}
+
+		video {
+			width: 100%;
+			max-height: 450px; // 增加最大高度以使视频更大
+		}
+	}
+}

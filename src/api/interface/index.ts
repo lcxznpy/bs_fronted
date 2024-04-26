@@ -76,6 +76,16 @@ export namespace Interview {
 		room_id: number;
 		success: boolean;
 	}
+	export interface CheckReq {
+		room_id: number;
+		password: string;
+	}
+	export interface CheckResp {
+		success: boolean;
+		code: number;
+		my_id: number;
+		remote_id: number;
+	}
 }
 
 export namespace Job {
