@@ -23,7 +23,7 @@ export const CreateArticleApi = (params: Article.CreateArticleReq) => {
 };
 
 export const DeleteArticleApi = (params: Article.DeleteArticleReq) => {
-	return http.post<Article.DeleteArticleResp>(ArticlePort + `/publish`, params, {
+	return http.delete<Article.DeleteArticleResp>(ArticlePort + `/delete`, params, {
 		headers: { "Content-Type": "application/json" }
 	});
 };
