@@ -1,21 +1,29 @@
 // @ts-nocheck
-import { useEffect, useState } from "react";
-import { Table, DatePicker, message } from "antd";
-// import useAuthButtons from "@/hooks/useAuthButtons";
-import { JobListUserApi } from "@/api/modules/job";
+import React, { useEffect, useState } from "react";
+import { JobListUserApi, DeleteJobApi } from "@/api/modules/job";
 import "./index.less";
 import { useNavigate } from "react-router-dom";
-// import { Interview } from "@/api/interface/interview";
-// import { Interview } from "@/api/interface/interview";
-// import { ResultData } from "@/api/interface/login";
-// import {Result} from "@/api/interface/login";
+import { Table, DatePicker, message, Space, Button } from "antd";
+import type { TableColumnsType } from "antd";
+
+interface DataType {
+	job_id: React.Key;
+	user_id: number;
+	desc: string;
+	content: string;
+	salary: string;
+	address: string;
+	company: string;
+}
 
 const List = () => {
 	// 按钮权限
 	// const { BUTTONS } = useAuthButtons();
 	const { RangePicker } = DatePicker;
 	const navigate = useNavigate();
-	const [datasource, setdatasource] = useState<any>();
+	const [datasource, setdatasource] = useState<DataType[]>([]);
+	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+	const datalist: DataType[] = [];
 	useEffect(() => {
 		// console.log(BUTTONS);
 	}, []);
@@ -27,15 +35,20 @@ const List = () => {
 				console.log(!data);
 				if (data) {
 					console.log("data", data);
-					// console.log("result", result?.InterviewListResp?.rooms);
 					const jobs = data?.jobs;
-					// console.log("rooms", rooms);
-					const qaq: any[] = jobs;
-					// const formattedDates = qaq.map(item => ({
-					// 	...item, // 复制对象的所有现有字段
-					// 	start_time: formatToYYYYMMDDHHMM(item.start_time), // 转换时间戳字段
-					// 	end_time: formatToYYYYMMDDHHMM(item.end_time)
-					// }));
+					jobs.forEach(element => {
+						// console.log("key:", element.job_id);
+						datalist.push({
+							job_id: element.job_id,
+							user_id: element.user_id,
+							desc: element.desc,
+							content: element.content,
+							salary: element.salary,
+							address: element.address,
+							company: element.company
+						});
+					});
+					const qaq: DataType[] = jobs;
 					setdatasource(qaq);
 				} else {
 					console.log("data", data);
@@ -49,8 +62,26 @@ const List = () => {
 		};
 		fetchData();
 	}, []);
-
-	const columns: any[] = [
+	const deleteJob = async () => {
+		try {
+			const resp = DeleteJobApi({ job_id: Number(selectedRowKeys[0]) });
+			if (resp.success === false) {
+				message.error("删除失败");
+			} else {
+				message.success("删除成功");
+			}
+		} finally {
+			navigate("/job/listuser");
+		}
+	};
+	const rowSelection = {
+		type: "radio",
+		onChange: (newSelectedRowKeys: React.Key[]) => {
+			console.log("selectedRowKeys", newSelectedRowKeys);
+			setSelectedRowKeys(newSelectedRowKeys);
+		}
+	};
+	const columns: TableColumnsType<DataType> = [
 		{
 			title: "岗位ID",
 			dataIndex: "job_id",
@@ -101,30 +132,16 @@ const List = () => {
 				<span>切换国际化的时候看我 😎 ：</span>
 				<RangePicker />
 			</div>
-			{/* <div className="auth">
+			<div>
 				<Space>
-					{BUTTONS.add && <Button type="primary">我是 Admin && User 能看到的按钮</Button>}
-					{BUTTONS.delete && <Button type="primary">我是 Admin 能看到的按钮</Button>}
-					{BUTTONS.edit && <Button type="primary">我是 User 能看到的按钮</Button>}
+					<Button type="primary" onClick={deleteJob} disabled={!selectedRowKeys.length}>
+						删除选中的文章
+					</Button>
 				</Space>
-			</div> */}
-			<Table bordered={true} dataSource={datasource} columns={columns} />
+			</div>
+			<Table rowSelection={rowSelection} dataSource={datasource} columns={columns} rowKey={record => record.job_id} />
 		</div>
 	);
 };
 
 export default List;
-
-// function formatToYYYYMMDDHHMM(timestamp: number) {
-// 	const date = new Date(timestamp * 1000); // 将时间戳（秒）转换为毫秒
-// 	const year = date.getUTCFullYear();
-// 	const month = date.getUTCMonth() + 1; // getUTCMonth() 返回的是 0-11，需要加1
-// 	const day = date.getUTCDate();
-// 	const hour = date.getUTCHours();
-// 	const minute = date.getUTCMinutes();
-// 	return parseInt(
-// 		`${year}${month.toString().padStart(2, "0")}${day.toString().padStart(2, "0")}${hour.toString().padStart(2, "0")}${minute
-// 			.toString()
-// 			.padStart(2, "0")}`
-// 	);
-// }
