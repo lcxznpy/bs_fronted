@@ -21,6 +21,11 @@ export const CreateInterViewApi = (params: Interview.CreateInterViewReq) => {
 	});
 };
 
+
+export const CheckApi = (params: Interview.CheckReq) => {
+	return http.post<Interview.CheckResp>(InterviewPort + `/check`, params, {});
+};
+
 export const DeleteInterviewApi = (params: Interview.DeleteInterviewReq) => {
 	return http.delete<Interview.DeleteInterviewResp>(InterviewPort + `/delete`, params, {
 		headers: { "Content-Type": "application/json" }

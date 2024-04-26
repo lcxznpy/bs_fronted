@@ -1,6 +1,10 @@
-// import Password from "antd/lib/input/Password";
+import { message } from "antd";
 import React, { useState, useEffect, useRef } from "react";
-// import { NavLink } from "react-router-dom";
+import { CheckApi } from "@/api/modules/interview";
+import { useNavigate } from "react-router-dom";
+import "./index.less";
+// import { Interview } from "@/api/interface";
+// import { error } from "console";
 
 interface MediaStreamWithTracks extends MediaStream {
 	addTrack(track: MediaStreamTrack): void;
@@ -49,8 +53,12 @@ const ICE_CFG: RTCConfiguration = {
 };
 
 const VideoChatApp: React.FC = () => {
+	const [roomId, setRoomId] = useState("");
+	const [password, setPassword] = useState("");
 	const [peerId, setPeerId] = useState("");
+	const [remoteID, setRemoteID] = useState("");
 	// const [remotePeerId, setRemotePeerId] = useState("");
+	const navigate = useNavigate();
 	const [peers, setPeers] = useState<string[]>([]);
 	const [isConnected, setIsConnected] = useState(false);
 	const localVideoRef = useRef<HTMLVideoElement>(null);
@@ -290,41 +298,105 @@ const VideoChatApp: React.FC = () => {
 			wsConnRef.current.send(JSON.stringify(receiveCallMessage));
 		}
 	};
-
-	const handleLogin = () => {
-		if (!peerId) {
-			alert("请输入有效的用户ID");
-			return;
+	const Check = async (roomId: string, password: string) => {
+		try {
+			// let req: Interview.CheckReq = ;
+			const data = await CheckApi({ room_id: Number(roomId), password: password });
+			console.log("in data", data);
+			return data;
+		} catch (error) {
+			console.log(error);
 		}
-		setPeerId(peerId);
-		console.log(peerId);
-		if (!isConnected) {
-			wsConnRef.current = new WebSocket(`wss://${window.location.hostname}:4445/?peerId=${peerId}`);
-			console.log(`0hostname${window.location.hostname}`);
-			wsConnRef.current.onopen = () => {
-				console.log("Connected to signaling server");
-				setIsConnected(true);
-			};
-			wsConnRef.current.onmessage = event => {
-				const message = JSON.parse(event.data);
-				handleMessage(message);
-			};
-			wsConnRef.current.onerror = error => {
-				console.log("WebSocket error:", error);
-			};
-			wsConnRef.current.onclose = () => {
-				console.log("WebSocket connection closed");
-				setIsConnected(false);
-			};
-		} else {
-			closeConnections();
+	};
+	useEffect(() => {
+		console.log("Updated MyId:", peerId, "Updated remoteId:", remoteID);
+		// 在这里你可以根据新的状态值执行其他逻辑
+	}, [remoteID, peerId]);
+	const handleLogin = async () => {
+		// if (!peerId) {
+		// 	alert("请输入有效的用户ID");
+		// 	return;
+		// }
+		try {
+			if (!roomId) {
+				message.warn("请输入有效的房间ID");
+				return;
+			}
+			if (!password) {
+				message.warn("请输入有效的密码");
+				return;
+			}
+			setRoomId(roomId);
+			setPassword(password);
+			setPeerId(peerId);
+			setRemoteID(remoteID);
+			console.log("roomID:", roomId, "password:", password, "peerid:", peerId, "remoteid:", remoteID);
+			const data = await Check(roomId, password);
+			console.log("data", data);
+			if (data.success === false || data.success === undefined) {
+				if (data.code === 1) {
+					message.error("密码错误");
+					return;
+				} else if (data.code === 2) {
+					message.error("房间不存在");
+					return;
+				} else if (data.code === 3) {
+					message.error("不在时间范围内");
+					return;
+				} else if (data.code === 4) {
+					message.error("服务器错误");
+					return;
+				} else if (data.code === 5) {
+					message.error("用户不匹配");
+					return;
+				} else {
+					message.error("服务器错误");
+				}
+			}
+			if (data.code === 0 && data.success === true) {
+				message.success("验证身份成功");
+			}
+			console.log(data.remote_id, data.my_id);
+			if (String(data.my_id) !== peerId) {
+				message.error("输入的(你的id)与真正的id不符");
+				navigate("/interview/list");
+			} else if (String(data.remote_id) !== remoteID) {
+				message.error("输入的(另一个人的id)与真正的id不符");
+				navigate("/interview/list");
+			}
+			if (!isConnected) {
+				wsConnRef.current = new WebSocket(`wss://${window.location.hostname}:4445/?peerId=${peerId}&remoteId=${remoteID}`);
+				console.log(`hostname${window.location.hostname}`);
+				message.success("进入房间成功");
+				wsConnRef.current.onopen = () => {
+					console.log("Connected to signaling server");
+					setIsConnected(true);
+				};
+				wsConnRef.current.onmessage = event => {
+					const message = JSON.parse(event.data);
+					handleMessage(message);
+				};
+				wsConnRef.current.onerror = error => {
+					console.log("WebSocket error:", error);
+				};
+				wsConnRef.current.onclose = () => {
+					console.log("WebSocket connection closed");
+					setIsConnected(false);
+				};
+			} else {
+				closeConnections();
+			}
+		} catch (error) {
+			console.log(error);
 		}
 	};
 
 	return (
 		<div>
-			<input value={peerId} onChange={e => setPeerId(e.target.value)} placeholder="Enter your Peer ID" />
-			<input id="Password" placeholder="Enter your password" />
+			<input value={roomId} onChange={e => setRoomId(e.target.value)} placeholder="请输入房间id" />
+			<input value={password} onChange={e => setPassword(e.target.value)} placeholder="请输入房间密码" />
+			<input value={peerId} onChange={e => setPeerId(e.target.value)} placeholder="你的id" />
+			<input value={remoteID} onChange={e => setRemoteID(e.target.value)} placeholder="另一个人的id" />
 			<button onClick={handleLogin}>{isConnected ? "Logout" : "Login"}</button>
 			<div>
 				{peers.map(peer => (
@@ -333,13 +405,16 @@ const VideoChatApp: React.FC = () => {
 					</button>
 				))}
 			</div>
-			<video ref={localVideoRef} autoPlay></video>
-			<video ref={remoteVideoRef} autoPlay></video>
-			{/* <video ref={remoteVideoRef} autoPlay></video> */}
-			{/* <video ref={localVideoRef} autoPlay muted />
-			<video ref={remoteVideoRef} autoPlay muted /> */}
-			<p>Video should be above this text.</p>
-			{/* 其他 UI 元素 */}
+			<div className="video-container">
+				<div>
+					<p>本地视角</p>
+					<video ref={localVideoRef} autoPlay></video>
+				</div>
+				<div>
+					<p>对方视角</p>
+					<video ref={remoteVideoRef} autoPlay></video>
+				</div>
+			</div>
 		</div>
 	);
 };
