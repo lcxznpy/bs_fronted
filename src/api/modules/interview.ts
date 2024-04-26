@@ -21,7 +21,6 @@ export const CreateInterViewApi = (params: Interview.CreateInterViewReq) => {
 	});
 };
 
-
 export const CheckApi = (params: Interview.CheckReq) => {
 	return http.post<Interview.CheckResp>(InterviewPort + `/check`, params, {});
 };

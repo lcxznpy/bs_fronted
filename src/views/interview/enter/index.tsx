@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { message } from "antd";
 import React, { useState, useEffect, useRef } from "react";
 import { CheckApi } from "@/api/modules/interview";
