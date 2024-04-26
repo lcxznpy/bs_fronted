@@ -76,6 +76,12 @@ export namespace Interview {
 		room_id: number;
 		success: boolean;
 	}
+	export interface DeleteInterviewReq {
+		room_id: number;
+	}
+	export interface DeleteInterviewResp {
+		success: boolean;
+	}
 }
 
 export namespace Job {
@@ -101,6 +107,12 @@ export namespace Job {
 	}
 	export interface CreateJobResp {
 		job_id: number;
+		success: boolean;
+	}
+	export interface DeleteJobReq {
+		job_id: number;
+	}
+	export interface DeleteJobResp {
 		success: boolean;
 	}
 }

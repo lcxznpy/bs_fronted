@@ -1,22 +1,26 @@
 // @ts-nocheck
-import { useEffect, useState } from "react";
-import { Table, DatePicker, message } from "antd";
+import React, { useEffect, useState } from "react";
+import { Table, DatePicker, message, Button, Space } from "antd";
 // import useAuthButtons from "@/hooks/useAuthButtons";
-import { ArticleListUserApi } from "@/api/modules/article";
-import "./index.less";
+import { ArticleListUserApi, DeleteArticleApi } from "@/api/modules/article";
 import { useNavigate } from "react-router-dom";
-// import { Interview } from "@/api/interface/interview";
-// import { Interview } from "@/api/interface/interview";
-// import { ResultData } from "@/api/interface/login";
-// import {Result} from "@/api/interface/login";
+import type { TableColumnsType } from "antd";
+
+interface DataType {
+	article_id: React.Key;
+	user_id: number;
+	title: string;
+	content: string;
+}
 
 const ListUser = () => {
 	// 按钮权限
 	// const { BUTTONS } = useAuthButtons();
 	const { RangePicker } = DatePicker;
 	const navigate = useNavigate();
-	const [datasource, setdatasource] = useState<any>();
-	// const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+	const [datasource, setdatasource] = useState<DataType[]>([]);
+	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+	const datalist: DataType[] = [];
 	useEffect(() => {
 		// console.log(BUTTONS);
 	}, []);
@@ -29,7 +33,19 @@ const ListUser = () => {
 				if (data) {
 					console.log("data", data);
 					const articles = data?.articles;
-					const qaq: any[] = articles;
+					articles.forEach(element => {
+						// console.log("key:", element.article_id);
+						datalist.push({
+							article_id: element.article_id,
+							user_id: element.user_id,
+							title: element.title,
+							content: element.content
+						});
+					});
+					// datalist.forEach(element => {
+					// 	console.log("element:", element);
+					// });
+					const qaq: DataType[] = articles;
 					setdatasource(qaq);
 				} else {
 					console.log("data", data);
@@ -43,26 +59,27 @@ const ListUser = () => {
 		};
 		fetchData();
 	}, []);
-	// const deleteArticle = async () => {
-	// 	try {
-	// 		const resp = DeleteArticleApi({ article_id: selectedRowKeys[0] });
-	// 		if (resp.success === false) {
-	// 			message.error("删除失败");
-	// 		} else {
-	// 			message.success("删除成功");
-	// 		}
-	// 	} finally {
-	// 		navigate("/article");
-	// 	}
-	// };
-	// const rowSelection = {
-	// 	type: "radio",
-	// 	onChange: newSelectedRowKeys => {
-	// 		setSelectedRowKeys(newSelectedRowKeys);
-	// 	}
-	// };
+	const deleteArticle = async () => {
+		try {
+			const resp = DeleteArticleApi({ article_id: Number(selectedRowKeys[0]) });
+			if (resp.success === false) {
+				message.error("删除失败");
+			} else {
+				message.success("删除成功");
+			}
+		} finally {
+			navigate("/article/listall");
+		}
+	};
+	const rowSelection = {
+		type: "radio",
+		onChange: (newSelectedRowKeys: React.Key[]) => {
+			console.log("selectedRowKeys", newSelectedRowKeys);
+			setSelectedRowKeys(newSelectedRowKeys);
+		}
+	};
 
-	const columns: any[] = [
+	const columns: TableColumnsType<DataType> = [
 		{
 			title: "文章ID",
 			dataIndex: "article_id",
@@ -95,14 +112,14 @@ const ListUser = () => {
 				<span>切换国际化的时候看我 😎 ：</span>
 				<RangePicker />
 			</div>
-			{/* <div className="auth">
+			<div>
 				<Space>
-					{BUTTONS.add && <Button type="primary">我是 Admin && User 能看到的按钮</Button>}
-					{BUTTONS.delete && <Button type="primary">我是 Admin 能看到的按钮</Button>}
-					{BUTTONS.edit && <Button type="primary">我是 User 能看到的按钮</Button>}
+					<Button type="primary" onClick={deleteArticle} disabled={!selectedRowKeys.length}>
+						删除选中的文章
+					</Button>
 				</Space>
-			</div> */}
-			<Table bordered={true} dataSource={datasource} columns={columns} />
+			</div>
+			<Table rowSelection={rowSelection} dataSource={datasource} columns={columns} rowKey={record => record.article_id} />
 		</div>
 	);
 };

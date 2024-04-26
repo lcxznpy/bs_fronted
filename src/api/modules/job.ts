@@ -27,3 +27,9 @@ export const CreateJobApi = (params: Job.CreateJobReq) => {
 		headers: { "Content-Type": "application/json" }
 	});
 };
+
+export const DeleteJobApi = (params: Job.DeleteJobReq) => {
+	return http.delete<Job.DeleteJobResp>(JobPort + `/delete`, params, {
+		headers: { "Content-Type": "application/json" }
+	});
+};

@@ -1,21 +1,28 @@
 // @ts-nocheck
-import { useEffect, useState } from "react";
-import { Table, DatePicker, message } from "antd";
-// import useAuthButtons from "@/hooks/useAuthButtons";
-import { InterviewListApi } from "@/api/modules/interview";
+import React, { useEffect, useState } from "react";
+import { Table, DatePicker, message, Space, Button } from "antd";
+import type { TableColumnsType } from "antd";
+import { InterviewListApi, DeleteInterviewApi } from "@/api/modules/interview";
 import "./index.less";
 import { useNavigate } from "react-router-dom";
-// import { Interview } from "@/api/interface/interview";
-// import { Interview } from "@/api/interface/interview";
-// import { ResultData } from "@/api/interface/login";
-// import {Result} from "@/api/interface/login";
+
+interface DataType {
+	room_id: React.Key;
+	hr_id: number;
+	user_id: number;
+	desc: string;
+	start_time: string;
+	end_time: string;
+}
 
 const List = () => {
 	// 按钮权限
 	// const { BUTTONS } = useAuthButtons();
 	const { RangePicker } = DatePicker;
 	const navigate = useNavigate();
-	const [datasource, setdatasource] = useState<any>();
+	const [datasource, setdatasource] = useState<DataType[]>([]);
+	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+	const datalist: DataType[] = [];
 	useEffect(() => {
 		// console.log(BUTTONS);
 	}, []);
@@ -30,13 +37,22 @@ const List = () => {
 					// console.log("result", result?.InterviewListResp?.rooms);
 					const rooms = data?.rooms;
 					// console.log("rooms", rooms);
-					const qaq: any[] = rooms;
-					const formattedDates = qaq.map(item => ({
+					const formattedDates = rooms.map(item => ({
 						...item, // 复制对象的所有现有字段
 						start_time: formatToYYYYMMDDHHMM(item.start_time), // 转换时间戳字段
 						end_time: formatToYYYYMMDDHHMM(item.end_time)
 					}));
-					setdatasource(formattedDates);
+					formattedDates.forEach(element => {
+						datalist.push({
+							room_id: element.room_id,
+							hr_id: element.hr_id,
+							user_id: element.user_id,
+							desc: element.desc,
+							start_time: element.start_time,
+							end_time: element.end_time
+						});
+					});
+					setdatasource(datalist);
 				} else {
 					console.log("data", data);
 					throw new Error("获取数据列表失败");
@@ -49,8 +65,26 @@ const List = () => {
 		};
 		fetchData();
 	}, []);
-
-	const columns: any[] = [
+	const deleteInterview = async () => {
+		try {
+			const resp = await DeleteInterviewApi({ room_id: Number(selectedRowKeys[0]) });
+			if (resp.success === false) {
+				message.error("删除失败");
+			} else {
+				message.success("删除成功");
+			}
+		} finally {
+			navigate("/interview/list");
+		}
+	};
+	const rowSelection = {
+		type: "radio",
+		onChange: (newSelectedRowKeys: React.Key[]) => {
+			console.log("selectedRowKeys", newSelectedRowKeys);
+			setSelectedRowKeys(newSelectedRowKeys);
+		}
+	};
+	const columns: TableColumnsType[DataType] = [
 		{
 			title: "房间ID",
 			dataIndex: "room_id",
@@ -95,14 +129,14 @@ const List = () => {
 				<span>切换国际化的时候看我 😎 ：</span>
 				<RangePicker />
 			</div>
-			{/* <div className="auth">
+			<div>
 				<Space>
-					{BUTTONS.add && <Button type="primary">我是 Admin && User 能看到的按钮</Button>}
-					{BUTTONS.delete && <Button type="primary">我是 Admin 能看到的按钮</Button>}
-					{BUTTONS.edit && <Button type="primary">我是 User 能看到的按钮</Button>}
+					<Button type="primary" onClick={deleteInterview} disabled={!selectedRowKeys.length}>
+						删除选中的文章
+					</Button>
 				</Space>
-			</div> */}
-			<Table bordered={true} dataSource={datasource} columns={columns} />
+			</div>
+			<Table rowSelection={rowSelection} dataSource={datasource} columns={columns} rowKey={record => record.room_id} />
 		</div>
 	);
 };
