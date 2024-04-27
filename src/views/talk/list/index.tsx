@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Layout, List, Avatar, Input, Button, Typography, Divider } from "antd";
 import { UserOutlined, SendOutlined } from "@ant-design/icons";
-
+// import { useNavigate } from "react-router-dom";
 const { Header, Footer, Sider, Content } = Layout;
 const { Text } = Typography;
 
@@ -20,7 +20,7 @@ interface Contact {
 
 const ChatApp: React.FC = () => {
 	const [currentChatId, setCurrentChatId] = useState<number>(1);
-
+	// const navigate = useNavigate();
 	const messages: { [key: number]: Message[] } = {
 		1: [{ id: 1, author: "Alice", content: "Hello, how are you?" }],
 		2: [{ id: 2, author: "Bob", content: "I'm fine, thanks! And you?" }]
@@ -30,7 +30,10 @@ const ChatApp: React.FC = () => {
 		{ id: 1, name: "Alice", avatarUrl: "" },
 		{ id: 2, name: "Bob", avatarUrl: "" }
 	];
-
+	const changeUrl = () => {
+		// navigate("http://localhost:3002");
+		window.open("http://localhost:3002", "_blank");
+	};
 	return (
 		<Layout style={{ height: "100vh" }}>
 			<Sider width={200} theme="light">
@@ -68,6 +71,7 @@ const ChatApp: React.FC = () => {
 					/>
 				</Footer>
 			</Layout>
+			<Button onClick={changeUrl}>跳转至聊天界面</Button>
 		</Layout>
 	);
 };
