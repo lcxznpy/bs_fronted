@@ -85,7 +85,7 @@ export namespace Interview {
 		code: number;
 		my_id: number;
 		remote_id: number;
-  }
+	}
 	export interface DeleteInterviewReq {
 		room_id: number;
 	}
@@ -124,6 +124,17 @@ export namespace Job {
 	}
 	export interface DeleteJobResp {
 		success: boolean;
+	}
+}
+
+export namespace User {
+	export interface UserInfoResp {
+		id: number;
+		username: string;
+		avatar: string;
+		mobile: string;
+		password: string;
+		resume: string;
 	}
 }
 
