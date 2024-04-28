@@ -15,11 +15,8 @@ const BasicForm = () => {
 		try {
 			setLoading(true);
 			// starttime = starttime / 1000;
-			const starttime = Math.floor(values.start_time.valueOf() / 1000);
-			const endtime = Math.floor(values.end_time.valueOf() / 1000);
-			// console.log(starttime, endtime);
-			// message.success("提交的数据为 : " + JSON.stringify(values));
-			// console.log(JSON.stringify(values));
+			const starttime = Math.floor(values.start_time.valueOf() / 1000) + 28800;
+			const endtime = Math.floor(values.end_time.valueOf() / 1000) + 28800;
 			const data = await CreateInterViewApi({
 				user_id: Number(values.user_id),
 				password: values.password,
@@ -52,18 +49,6 @@ const BasicForm = () => {
 			console.log(e);
 		}
 	};
-
-	// const onReset = () => {
-	// 	form.resetFields();
-	// };
-
-	// const onFill = () => {
-	// 	form.setFieldsValue({
-	// 		user: "mark",
-	// 		note: "Hello world!",
-	// 		gender: "male"
-	// 	});
-	// };
 
 	return (
 		// ...
