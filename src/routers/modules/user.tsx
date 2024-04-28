@@ -16,8 +16,8 @@ const userRouter: Array<RouteObject> = [
 				element: lazyLoad(React.lazy(() => import("@/views/user/info/index"))),
 				meta: {
 					requiresAuth: true,
-					title: "岗位列表",
-					key: "job_list"
+					title: "用户信息",
+					key: "user_info"
 				}
 			}
 		]

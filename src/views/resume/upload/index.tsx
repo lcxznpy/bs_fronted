@@ -4,11 +4,31 @@ import { UploadOutlined } from "@ant-design/icons";
 import type { UploadProps } from "antd";
 import { Button, message, Upload } from "antd";
 
-const props: UploadProps = {
-	name: "file",
-	action: "https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload",
+const Resumeprops: UploadProps = {
+	name: "resume",
+	action: "https://localhost:4443/v1/upload/resume",
 	headers: {
-		authorization: "authorization-text"
+		authorization: localStorage.getItem("token")
+	},
+	onChange(info) {
+		if (info.file.status !== "uploading") {
+			console.log(info.file, info.fileList);
+		}
+		if (info.file.status === "done") {
+			message.success(`${info.file.name} file uploaded successfully`);
+		} else if (info.file.status === "error") {
+			info.file.status = "done";
+			message.success(`${info.file.name} file uploaded successfully`);
+			// message.error(`${info.file.name} file upload failed.`);
+		}
+	}
+};
+
+const Avatarprops: UploadProps = {
+	name: "avatar",
+	action: "https://localhost:4443/v1/upload/avatar",
+	headers: {
+		authorization: localStorage.getItem("token")
 	},
 	onChange(info) {
 		if (info.file.status !== "uploading") {
@@ -26,10 +46,10 @@ const props: UploadProps = {
 
 const App: React.FC = () => (
 	<Fragment>
-		<Upload {...props}>
+		<Upload {...Resumeprops}>
 			<Button icon={<UploadOutlined />}>上传简历</Button>
 		</Upload>
-		<Upload {...props}>
+		<Upload {...Avatarprops}>
 			<Button icon={<UploadOutlined />}>上传头像</Button>
 		</Upload>
 	</Fragment>
