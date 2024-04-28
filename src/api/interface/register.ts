@@ -44,7 +44,7 @@ export namespace Register {
 		};
 	}
 	export interface SendReq {
-		mobile: string;
+		phone: string;
 	}
 	export interface SendResp {
 		code: string;

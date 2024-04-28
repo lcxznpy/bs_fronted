@@ -64,7 +64,7 @@ const RegisterForm = (props: any) => {
 			if (phone == "" || phone == undefined) {
 				message.error("请输入手机号");
 			}
-			const data = await sendCodeApi({ mobile: phone });
+			const data = await sendCodeApi({ phone: phone });
 			console.log("data", data?.code);
 			if (data?.code == "200") {
 				console.log("data", data);
